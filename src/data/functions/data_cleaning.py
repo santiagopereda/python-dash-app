@@ -223,3 +223,42 @@ def fill_country_subdivision(df: pd.DataFrame) -> pd.DataFrame:
                         code=subdivision_code).type
                     break
     return df
+
+
+def normalize_countrynames(df: pd.DataFrame, check_column: str, target_column: str, mapping_values: dict) -> pd.DataFrame:
+    """
+    Normalize country names in a DataFrame column based on a mapping dictionary.
+
+    Parameters:
+        df: The input DataFrame.
+        check_column: The name of the column to check for country names.
+        target_column: The name of the column to update with normalized country names.
+        mapping_values: A dictionary mapping old country names to new country names.
+
+    Returns:
+        The DataFrame with normalized country names in the specified column.
+    """
+
+    # Iterate over each row in the DataFrame
+    for index, row in df.iterrows():
+        # Get the value in the check column for the current row
+        check_loc = str(row[check_column])
+
+        # Initialize variable to track matching subdivision
+        matching_subdivision = None
+
+        # Iterate over the mapping values
+        for oldname_map, newname_map in mapping_values.items():
+            # Check if the old country name is found in the check column value
+            if unidecode(oldname_map.lower()) in unidecode(check_loc.lower()):
+                matching_subdivision = newname_map
+                break
+
+        # Update the target column value if a matching subdivision is found
+        if matching_subdivision and check_column == target_column:
+            df.at[index, target_column] = unidecode(newname_map)
+        else:
+            # Keep the original check column value
+            df.at[index, check_column] = unidecode(check_loc)
+
+    return df
