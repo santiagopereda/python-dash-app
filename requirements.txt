@@ -9,6 +9,7 @@ voila
 ###### Requirements with Version Specifiers ######
 
 black==23.3.0
+dash==2.10.2
 geocoder==1.38.1 
 geopy==2.3.0
 pycountry==22.3.5 

@@ -255,10 +255,7 @@ def normalize_countrynames(df: pd.DataFrame, check_column: str, target_column: s
                 break
 
         # Update the target column value if a matching subdivision is found
-        if matching_subdivision and check_column == target_column:
+        if matching_subdivision:
             df.at[index, target_column] = unidecode(newname_map)
-        else:
-            # Keep the original check column value
-            df.at[index, check_column] = unidecode(check_loc)
 
     return df

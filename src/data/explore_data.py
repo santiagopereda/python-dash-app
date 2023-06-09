@@ -1,5 +1,4 @@
 from functions.data_cleaning import *
-from unidecode import unidecode
 import pickle
 
 # ======================================================================================================================
@@ -40,6 +39,7 @@ countrytoname_mapping = {
     "Madeira": "Portugal",
     "Brunei": "Brunei Darussalam",
     "US Virgin Islands": "United States"
+    "Saba": "Netherlands"
 }
 
 nametocountry_mapping = {
@@ -47,6 +47,10 @@ nametocountry_mapping = {
     "Guam": "Guam",
     "Aruba": "Aruba",
     "Curacao": "Curacao",
+}
+
+nametoname_mapping = {
+    "Dependencias Federales": "Distrito Federal",
 }
 
 upd_df = normalize_countrynames(
@@ -76,12 +80,6 @@ upd_df = upd_df.drop(drop_list, axis=1)
 upd_df["DateStandardized"] = upd_df["DateStandardized"].dt.date
 upd_df = upd_df.set_index(upd_df["DateStandardized"]).sort_index()
 upd_df.index = pd.to_datetime(upd_df.index)
-
-
-upd_df["COUNTRY"].unique()
-
-sorted(upd_df[upd_df["COUNTRY"] == "United States"]["NAME"].unique())
-
 
 # ======================================================================================================================
 # Export dataset
