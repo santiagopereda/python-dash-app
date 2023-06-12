@@ -1,0 +1,28 @@
+body {
+    /* Default light mode styles */
+    background-color: #f5f5f5;
+    color: #333333;
+}
+
+@media (prefers-color-scheme: dark) {
+
+    /* Dark mode styles */
+    body {
+        background-color: #333333;
+        color: #f5f5f5;
+    }
+    
+}
+
+.my-dropdown .Select-menu-outer {
+    background-color: transparent;
+}
+
+.my-dropdown .Select-value,
+.my-dropdown .Select-multi-value {
+    /* Styles for the wrapper of selected values in a multi-select dropdown */
+    border: 1px solid rgb(164, 167, 165); /* Change the color and size of the border */
+}
+.my-dropdown .custom-selected-option {
+    color: red;  /* Change the color of the selected options */
+}
