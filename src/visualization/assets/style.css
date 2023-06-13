@@ -11,18 +11,48 @@ body {
         background-color: #333333;
         color: #f5f5f5;
     }
-    
+
 }
 
 .my-dropdown .Select-menu-outer {
-    background-color: transparent;
+    background-color: #333333;
+    color: #f5f5f5;
 }
 
-.my-dropdown .Select-value,
-.my-dropdown .Select-multi-value {
-    /* Styles for the wrapper of selected values in a multi-select dropdown */
-    border: 1px solid rgb(164, 167, 165); /* Change the color and size of the border */
+.my-dropdown .VirtualizedSelectFocusedOption {
+    background-color: #f5f5f5;
+    color: #333333;
 }
-.my-dropdown .custom-selected-option {
-    color: red;  /* Change the color of the selected options */
+
+.my-dropdown .Select-value-label {
+    /* Styles for the input field in the dropdown */
+    color: #f5f5f5;
+  }
+
+  .my-dropdown .Select-control {
+    height: calc(1.5em + 0.75rem + 2px);
+    font-size: 0.9375rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #f5f5f5;
+    background-color: #222;
+    background-clip: padding-box;
+    border: 1px solid #444;
+    border-radius: 0.25rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.my-dropdown .Select-control:hover {
+    box-shadow: none;
+}
+
+.my-dropdown .is-focused:not(.is-open) > .Select-control {
+    border-color: #aaa;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(55, 90, 127, 0.25);
+}
+
+.my-dropdown .has-value.Select--single > .Select-control .Select-value .Select-value-label,
+.my-dropdown .has-value.is-pseudo-focused.Select--single > .Select-control .Select-value .Select-value-label {
+  color: #f5f5f5;
 }

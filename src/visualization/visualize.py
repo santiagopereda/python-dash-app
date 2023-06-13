@@ -18,10 +18,6 @@ df_2 = pd.read_pickle(pickle_loc_2)
 token = "pk.eyJ1Ijoic2FudGlhZ29wZXJlZGEiLCJhIjoiY2xpbm1wZG9qMDAyZTNtbGJsZDJjYWN2NyJ9.i66XD8Qd9IF3tjhRAV5oNg"
 
 
-df_1[df_1["COUNTRY"]==["Argentina","Venezuela"]]
-
-df_1.loc[df_1["COUNTRY"].isin(["Argentina","Venezuela"])]
-
 # --------------------------------------------------------------
 # Mapbox
 # --------------------------------------------------------------
@@ -53,12 +49,14 @@ fig_1.show()
 # Pie Charts
 # --------------------------------------------------------------
 
-level_one_slice = slice(None)
+level_one_slice = "Venezuela"
 level_two_slice = slice(None)
-level_three_slice = slice(None)
+year_slice = slice(None)
 
 sliced_df = slice_multi_index_dataframe(df_2, level_one_slice,
-                                        level_two_slice, level_three_slice)
+                                        level_two_slice, year_slice)
+
+sliced_df.index.get_level_values(1).unique()
 
 bar_chart_cols = ['SUM_Soft_CigaretteButts', 'SUM_Hard_Lighter',
                   'SUM_Soft_Straw', 'SUM_Hard_PlasticBeverageBottle',
@@ -73,37 +71,37 @@ bar_chart_cols = ['SUM_Soft_CigaretteButts', 'SUM_Hard_Lighter',
                   'SUM_Soft_OtherPlastic', 'SUM_Foam_OtherPlasticDebris',
                   'SUM_OtherPlasticDebris', 'SUM_OtherHardPlastic']
 
-filtered_df = dynamic_barchart(sliced_df, bar_chart_cols)
+filtered_df = yearly_filtered_data(sliced_df, bar_chart_cols, True)
 # --------------------------------------------------------------
 # Adjust plot settings
 # --------------------------------------------------------------
 
-
+yearly_filtered_data(sliced_df, ['Organization','TotalVolunteers','UniqueID'], False)
 # --------------------------------------------------------------
 # Compare medium vs. heavy sets
 # --------------------------------------------------------------
+level_one_slice = "Italy"
+level_two_slice = "Calabria"
+year_slice = slice(None)
+threshold_check = True
 
+filtered_location = location_filter(df_1, level_one_slice, level_two_slice, threshold_check)
 
-# --------------------------------------------------------------
-# Compare participants
-# --------------------------------------------------------------
+filtered_location.index
 
+fig = px.pie(filtered_location, values='SUM', names=filtered_location.index)
 
-# --------------------------------------------------------------
-# Plot multiple axis
-# --------------------------------------------------------------
+fig.update_layout(
+                paper_bgcolor="rgba(0,0,0,0)",
+                font=dict(color='white'),   # Set the text color to white
+                showlegend=False,
+                legend=dict(
+                    orientation='h',  # Set the legend orientation to horizontal (top)
+                    yanchor='bottom',
+                    y=-5,  # Adjust the position of the legend
+                    xanchor='left',
+                    x=0.1
+                    ),  
+                )
 
-
-# --------------------------------------------------------------
-# Create a loop to plot all combinations per sensor
-# --------------------------------------------------------------
-
-
-# --------------------------------------------------------------
-# Combine plots in one figure
-# --------------------------------------------------------------
-
-
-# --------------------------------------------------------------
-# Loop over all combinations and export for both sensors
-# --------------------------------------------------------------
+fig
