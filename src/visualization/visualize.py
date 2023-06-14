@@ -49,7 +49,7 @@ fig_1.show()
 # Pie Charts
 # --------------------------------------------------------------
 
-level_one_slice = "Venezuela"
+level_one_slice = "United States"
 level_two_slice = slice(None)
 year_slice = slice(None)
 
@@ -81,7 +81,7 @@ yearly_filtered_data(sliced_df, ['Organization','TotalVolunteers','UniqueID'], F
 # Compare medium vs. heavy sets
 # --------------------------------------------------------------
 level_one_slice = "Italy"
-level_two_slice = "Calabria"
+level_two_slice = "Campania"
 year_slice = slice(None)
 threshold_check = True
 
@@ -105,3 +105,5 @@ fig.update_layout(
                 )
 
 fig
+
+df_1[(df_1["COUNTRY"]=="Philippines") & (df_1["NAME"]=="Zambales")]
