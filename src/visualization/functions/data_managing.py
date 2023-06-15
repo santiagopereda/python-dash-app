@@ -120,8 +120,10 @@ def location_filter(df: pd.DataFrame, level_one_slice, level_two_slice, threshol
         # Find the threshold value for the top 90% most relevant bars
         threshold = dff['SUM'].sum() * 0.9
 
+    if threshold_check and len(dff[dff['cumulative_sum'] <= threshold]) > 0:
         # Filter the DataFrame to include only the bars below the threshold
         filtered_df = dff[dff['cumulative_sum'] <= threshold]
+    
     else:
         # No threshold applied, use the entire DataFrame
         filtered_df = dff

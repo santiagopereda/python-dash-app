@@ -80,14 +80,12 @@ yearly_filtered_data(sliced_df, ['Organization','TotalVolunteers','UniqueID'], F
 # --------------------------------------------------------------
 # Compare medium vs. heavy sets
 # --------------------------------------------------------------
-level_one_slice = "Italy"
-level_two_slice = "Campania"
+level_one_slice = "Philippines"
+level_two_slice = "Cavite"
 year_slice = slice(None)
 threshold_check = True
 
-filtered_location = location_filter(df_1, level_one_slice, level_two_slice, threshold_check)
-
-filtered_location.index
+filtered_location = location_filter(df_1, level_one_slice, level_two_slice, True)
 
 fig = px.pie(filtered_location, values='SUM', names=filtered_location.index)
 
@@ -105,5 +103,3 @@ fig.update_layout(
                 )
 
 fig
-
-df_1[(df_1["COUNTRY"]=="Philippines") & (df_1["NAME"]=="Zambales")]
