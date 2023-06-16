@@ -1,13 +1,9 @@
 import re
-import sys
-import geopy
-import shutil
 import pycountry
 import pandas as pd
 from unidecode import unidecode
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut
-pd.options.display.max_rows = 100
 
 
 def split_column_by_hyphen(df: pd.DataFrame, column: str) -> pd.DataFrame:
@@ -83,14 +79,15 @@ def update_location(df: pd.DataFrame, index: int) -> None:
     try:
         # Retrieve location information using geolocator
         location = geolocator.reverse(
-            latitude + ',' + longitude, language='en')
+            latitude + ',' + longitude, language='en')  # type: ignore
 
         # Update the DataFrame if location information is available
-        if location is not None and location.raw is not None:
-            raw_data = location.raw.get('address', {})
+        if location is not None and location.raw is not None:  # type: ignore
+            raw_data = location.raw.get('address', {})  # type: ignore
 
-            if 'display_name' in location.raw:
-                df.at[index, 'Location'] = location.raw['display_name']
+            if 'display_name' in location.raw:  # type: ignore
+                # type: ignore
+                df.at[index, 'Location'] = location.raw['display_name'] # type: ignore
 
             if 'city' in raw_data:
                 df.at[index, 'NAME'] = raw_data['state']
@@ -115,13 +112,26 @@ def fill_null_countries(df: pd.DataFrame) -> pd.DataFrame:
 
     def echo(string, padding=80):
         padding = " " * (padding - len(string)) if padding else ""
-        print(string + padding, end='\r')
+        print(string + padding, end='\r', flush=True)
 
     # Get a list of countries with null values in the 'Location' column
     country_list = df[df['Location'].isnull()]['COUNTRY'].unique()
     country_len = len(df[df['Location'].isnull()]['COUNTRY'])
+
+    # Get a subset of the DataFrame for rows with null values in both 'Location' and 'COUNTRY' columns
+    null_df = df[df['Location'].isnull() & df['COUNTRY'].isnull()]
+    null_len = len(df[df['Location'].isnull() & df['COUNTRY'].isnull()])
+
+    # Get a list of countries with null values in the 'Location' column
+    null_country_list = df[df['COUNTRY'].isnull(
+    )]['CountryName_FromSource'].unique()
+    location_len = len(df[df['COUNTRY'].isnull()]['CountryName_FromSource'])
+
+    job_len = country_len + null_len + location_len
+
     # Counter for tracking progress
     i = 0
+
     # Iterate over each country
     for country in country_list:
         # Get a subset of the DataFrame for the current country
@@ -132,41 +142,31 @@ def fill_null_countries(df: pd.DataFrame) -> pd.DataFrame:
             update_location(df, index)
 
             i += 1
-            progress = (f"{i}/{country_len} {row['COUNTRY']}")
+            progress = (f"{i}/{job_len} {row['COUNTRY']}")
             echo(progress)
 
-    # Get a subset of the DataFrame for rows with null values in both 'Location' and 'COUNTRY' columns
-    null_df = df[df['Location'].isnull() & df['COUNTRY'].isnull()]
-    null_len = len(df[df['Location'].isnull() & df['COUNTRY']])
-    # Counter for tracking progress
-    i = 0
     # Iterate over each row in the subset
     for index, row in null_df.iterrows():
-        update_location(df, index)
+        update_location(df, index) # type: ignore
 
         i += 1
-        progress = (f"{i}/{null_len} {row['COUNTRY']}")
+        progress = (f"{i}/{job_len} {row['Location']}")
         echo(progress)
 
-    # Get a list of countries with null values in the 'Location' column
-    country_list = df[df['COUNTRY'].isnull(
-    )]['CountryName_FromSource'].unique()
-    country_len = len(df[df['COUNTRY'].isnull()]['CountryName_FromSource'])
-    # Counter for tracking progress
-    i = 0
     # Iterate over each country
-    for country in country_list:
+    for country in null_country_list:
         # Get a subset of the DataFrame for rows with null values in both 'Location' and 'COUNTRY' columns
-        country_df = df[(df['COUNTRY'].isnull()) & (
+        null_country_df = df[(df['COUNTRY'].isnull()) & (
             df['CountryName_FromSource'] == country)]
 
         # Iterate over each row in the subset
-        for index, row in country_df.iterrows():
+        for index, row in null_country_df.iterrows():
             update_location(df, index)
 
             i += 1
-            progress = (f"{i}/{country_len} {row['COUNTRY']}")
+            progress = (f"{i}/{job_len} {row['CountryName_FromSource']}")
             echo(progress)
+
     return df
 
 
@@ -200,9 +200,9 @@ def fill_country_subdivision(df: pd.DataFrame) -> pd.DataFrame:
         if matching_subdivision:
             # Update the corresponding columns with the subdivision information
             df.at[index, 'NAME'] = pycountry.subdivisions.get(
-                code=subdivision_code).name
+                code=subdivision_code).name  # type: ignore
             df.at[index, 'LAND_TYPE'] = pycountry.subdivisions.get(
-                code=subdivision_code).type
+                code=subdivision_code).type  # type: ignore
         else:
             # Try to match subdivision using regular expressions on the 'Location' column
             for subdivision_name, subdivision_code in subdivision_mapping.items():
@@ -218,9 +218,9 @@ def fill_country_subdivision(df: pd.DataFrame) -> pd.DataFrame:
 
                     # Update the corresponding columns with the subdivision information
                     df.at[index, 'NAME'] = pycountry.subdivisions.get(
-                        code=subdivision_code).name
+                        code=subdivision_code).name  # type: ignore
                     df.at[index, 'LAND_TYPE'] = pycountry.subdivisions.get(
-                        code=subdivision_code).type
+                        code=subdivision_code).type  # type: ignore
                     break
     return df
 
@@ -259,3 +259,191 @@ def normalize_countrynames(df: pd.DataFrame, check_column: str, target_column: s
             df.at[index, target_column] = unidecode(newname_map)
 
     return df
+
+
+def fill_null_organizations(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Fills null, None, and non-null, non-NoneType organization values in a DataFrame with corresponding mapped values from the same DataFrame.
+    Sets organization to "Not Listed" if there is no match for a LocationFreqID.
+
+    Args:
+        df (pd.DataFrame): The input DataFrame containing 'LocationFreqID' and 'Organization' columns.
+
+    Returns:
+        pd.DataFrame: The DataFrame with null, None, and non-null, non-NoneType organization values filled using the mapped values.
+
+    """
+    org_dict = {}
+
+    for index, row in df.iterrows():
+        if pd.isna(row['Organization']) or row['Organization'] is None or row['Organization'] == 'nan':
+            location_id = row['LocationFreqID']
+
+            if location_id in org_dict:
+                df.at[index, 'Organization'] = org_dict[location_id]
+            else:
+                non_null_org = df.loc[(
+                    df["LocationFreqID"] == location_id) & df["Organization"].notna(), "Organization"]
+                if not non_null_org.empty:
+                    org_value = non_null_org.iloc[0]
+                    org_dict[location_id] = org_value
+                    df.at[index, 'Organization'] = org_value
+                else:
+                    # Set to "Not Listed" when there is no match
+                    org_value = "No Organization Data Provided"
+                    org_dict[location_id] = org_value
+        else:
+            continue
+
+    return df
+
+
+def extract_location(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Extracts the first part of the 'Location' column by splitting on comma and updates the DataFrame.
+
+    Args:
+        df (pd.DataFrame): The input DataFrame containing the 'Location' column.
+
+    Returns:
+        pd.DataFrame: The DataFrame with the 'Location' column updated to contain only the first part of the location.
+
+    """
+    for index, row in df.iterrows():
+        location = str(row['Location']).split(", ")[0]
+        df.at[index, 'Location'] = location
+
+    return df
+
+
+def add_coordinates_to_dataframe(df: pd.DataFrame, coordinates: dict) -> pd.DataFrame:
+    """
+    Add latitude and longitude coordinates to a dataframe based on a given dictionary.
+
+    Args:
+        df (pd.DataFrame): The dataframe to update.
+        coordinates (dict): A dictionary containing country coordinates.
+
+    Returns:
+        pd.DataFrame: The updated dataframe with latitude and longitude columns.
+    """
+    # Create new columns for latitude and longitude in the dataframe
+    df['COUNTRY_Latitude'] = None
+    df['COUNTRY_Longitude'] = None
+
+    # Iterate through the dataframe and update latitude and longitude columns
+    for index, row in df.iterrows():
+        country = row['COUNTRY']
+        if country in coordinates:
+            df.at[index, 'COUNTRY_Latitude'] = coordinates[country][0]['latitude']
+            df.at[index, 'COUNTRY_Longitude'] = coordinates[country][0]['longitude']
+
+    return df
+
+
+def create_country_dict(df: pd.DataFrame) -> dict:
+    """
+    Create a dictionary of countries and their coordinates based on a given dataframe.
+
+    Args:
+        df (pd.DataFrame): The dataframe containing country data.
+
+    Returns:
+        dict: A dictionary mapping country names to lists of coordinate dictionaries.
+    """
+    country_dict = {}
+
+    for _, row in df.iterrows():
+        country = row['name']
+        latitude = row['latitude']
+        longitude = row['longitude']
+
+        if country not in country_dict:
+            country_dict[country] = []
+
+        country_dict[country].append({
+            'latitude': float(latitude),
+            'longitude': float(longitude)
+        })
+
+    return country_dict
+
+
+fill_values = {'TotalVolunteers': 0.0,
+               'Totalltems_EventRecord': 0,
+               'TotalClassifiedItems_EC2020': 0,
+               'PCT_PlasticAndFoam': 0.0,
+               'PCT_Glass_Rubber_Lumber_Metal': 0.0,
+               'SUM_Hard_PlasticBeverageBottle': 0,
+               'SUM_Hard_OtherPlasticBottle': 0,
+               'SUM_HardOrSoft_PlasticBottleCap': 0,
+               'SUM_PlasticOrFoamFoodContainer': 0.0,
+               'SUM_Hard_BucketOrCrate': 0,
+               'SUM_Hard_Lighter': 0.0,
+               'SUM_OtherHardPlastic': 0,
+               'SUM_PlasticOrFoamPlatesBowlsCup': 0,
+               'SUM_HardSoft_PersonalCareProduc': 0,
+               'SUM_HardSoftLollipopStick_EarBu': 0,
+               'SUM_Soft_Bag': 0,
+               'SUM_Soft_WrapperOrLabel': 0,
+               'SUM_Soft_Straw': 0.0,
+               'SUM_Soft_OtherPlastic': 0,
+               'SUM_Soft_CigaretteButts': 0.0,
+               'SUM_Soft_StringRingRibbon': 0,
+               'Fishing_Net': 0,
+               'SUM_FishingLineLureRope': 0,
+               'Fishing_BuoysAndFloats': 0,
+               'SUM_Foam_OtherPlasticDebris': 0,
+               'SUM_OtherPlasticDebris': 0.0,
+               'LAND_RANK': 0.0,
+               'Shape__Area': 0.0,
+               'Shape__Length': 0.0,
+               'Soft_Sheets2': 0,
+               'PlasticStraps2': 0,
+               'FishingGlowSticks2': 0,
+               'FishingOtherPlasticDebris2': 0}
+
+col_data_type = {'UniqueID': str,
+                 'LocationFreqID': str,
+                 'Location': str,
+                 'Dataset': str,
+                 'TotalLength_m': str,
+                 'EventType': str,
+                 'TotalVolunteers': int,
+                 'Month': str,
+                 'Totalltems_EventRecord': int,
+                 'TotalClassifiedItems_EC2020': int,
+                 'PCT_PlasticAndFoam': int,
+                 'PCT_Glass_Rubber_Lumber_Metal': int,
+                 'SUM_Hard_PlasticBeverageBottle': int,
+                 'SUM_Hard_OtherPlasticBottle': int,
+                 'SUM_HardOrSoft_PlasticBottleCap': int,
+                 'SUM_PlasticOrFoamFoodContainer': int,
+                 'SUM_Hard_BucketOrCrate': int,
+                 'SUM_Hard_Lighter': int,
+                 'SUM_OtherHardPlastic': int,
+                 'SUM_PlasticOrFoamPlatesBowlsCup': int,
+                 'SUM_HardSoft_PersonalCareProduc': int,
+                 'SUM_HardSoftLollipopStick_EarBu': int,
+                 'SUM_Soft_Bag': int,
+                 'SUM_Soft_WrapperOrLabel': int,
+                 'SUM_Soft_Straw': int,
+                 'SUM_Soft_OtherPlastic': int,
+                 'SUM_Soft_CigaretteButts': int,
+                 'SUM_Soft_StringRingRibbon': int,
+                 'Fishing_Net': int,
+                 'SUM_FishingLineLureRope': int,
+                 'Fishing_BuoysAndFloats': int,
+                 'SUM_Foam_OtherPlasticDebris': int,
+                 'SUM_OtherPlasticDebris': int,
+                 'NAME': str,
+                 'COUNTRY': str,
+                 'CONTINENT': str,
+                 'LAND_TYPE': str,
+                 'LAND_RANK': int,
+                 'Shape__Area': int,
+                 'Shape__Length': int,
+                 'Soft_Sheets2': int,
+                 'PlasticStraps2': int,
+                 'FishingGlowSticks2': int,
+                 'FishingOtherPlasticDebris2': int}
