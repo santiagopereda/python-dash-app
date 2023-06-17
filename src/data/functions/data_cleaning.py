@@ -1,4 +1,5 @@
 import re
+from typing import Any
 import pycountry
 import pandas as pd
 from unidecode import unidecode
@@ -78,16 +79,14 @@ def update_location(df: pd.DataFrame, index: int) -> None:
 
     try:
         # Retrieve location information using geolocator
-        location = geolocator.reverse(
-            latitude + ',' + longitude, language='en')  # type: ignore
+        location: Any = geolocator.reverse(latitude + ',' + longitude, language='en') # type: ignore
 
         # Update the DataFrame if location information is available
-        if location is not None and location.raw is not None:  # type: ignore
-            raw_data = location.raw.get('address', {})  # type: ignore
+        if location is not None and location.raw is not None:
+            raw_data = location.raw.get('address', {})
 
-            if 'display_name' in location.raw:  # type: ignore
-                # type: ignore
-                df.at[index, 'Location'] = location.raw['display_name'] # type: ignore
+            if 'display_name' in location.raw:
+                df.at[index, 'Location'] = location.raw['display_name']
 
             if 'city' in raw_data:
                 df.at[index, 'NAME'] = raw_data['state']
@@ -225,6 +224,8 @@ def fill_country_subdivision(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+from unidecode import unidecode
+
 def normalize_countrynames(df: pd.DataFrame, check_column: str, target_column: str, mapping_values: dict) -> pd.DataFrame:
     """
     Normalize country names in a DataFrame column based on a mapping dictionary.
@@ -256,9 +257,10 @@ def normalize_countrynames(df: pd.DataFrame, check_column: str, target_column: s
 
         # Update the target column value if a matching subdivision is found
         if matching_subdivision:
-            df.at[index, target_column] = unidecode(newname_map)
+            df.at[index, target_column] = unidecode(matching_subdivision)
 
     return df
+
 
 
 def fill_null_organizations(df: pd.DataFrame) -> pd.DataFrame:
@@ -284,14 +286,15 @@ def fill_null_organizations(df: pd.DataFrame) -> pd.DataFrame:
             else:
                 non_null_org = df.loc[(
                     df["LocationFreqID"] == location_id) & df["Organization"].notna(), "Organization"]
-                if not non_null_org.empty:
+                if isinstance(non_null_org, pd.Series) and not non_null_org.empty:
                     org_value = non_null_org.iloc[0]
                     org_dict[location_id] = org_value
-                    df.at[index, 'Organization'] = org_value
                 else:
                     # Set to "Not Listed" when there is no match
                     org_value = "No Organization Data Provided"
                     org_dict[location_id] = org_value
+
+                df.at[index, 'Organization'] = org_value
         else:
             continue
 

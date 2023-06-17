@@ -12,7 +12,6 @@ df.fillna(value=fill_values, inplace=True)
 
 df_2_location = '../../data/raw/country_coordinates.csv'
 df_2 = pd.read_csv(df_2_location)
-country_coordinates = create_country_dict(df_2)
 
 # ======================================================================================================================
 # Splits a specified column, adds a hyphen, and joins it back together.
@@ -49,16 +48,33 @@ df = extract_location(df)
 # Normalize Country Names
 # ======================================================================================================================
 countrytoname_mapping = {
-    "Russian Federation": "Russia",
-    "Saint Helena, Ascension and Tristan da Cunha": "Saint Helena",
-    "Madeira": "Portugal",
-    "Brunei Darussalam": "Brunei",
-    "US Virgin Islands": "United States",
-    "Saba": "Netherlands",
-    "Canarias": "Spain",
     "Azores": "Portugal",
+    'Bahamas, The': 'Bahamas',
+    'Bosnia & Herzegovina': 'Bosnia and Herzegovina',
+    'British Virgin Is.': 'British Virgin Islands',
+    "Brunei Darussalam": "Brunei",
+    'Burma': 'Myanmar',
+    "Canarias": "Spain",
+    "Cabo Verde": "Cape Verde",
+    'Korea, South': 'South Korea',
+    "Madeira": "Portugal",
+    "Macedonia [FYROM]": 'North Macedonia',
+    'Macedonia': 'North Macedonia',
+    'Micronesia, Fed. St.': 'Micronesia',
+    'N. Mariana Islands': 'Northern Mariana Islands',
+    "Myanmar [Burma]": 'Myanmar',
+    'Réunion': 'Reunion',
+    "Russian Federation": "Russia",
+    "Saba": "Netherlands",
+    "Saint Helena, Ascension and Tristan da Cunha": "Saint Helena",
+    'Saint Kitts & Nevis': 'Saint Kitts and Nevis',
+    "São Tomé and Príncipe": 'Sao Tome and Principe',
+    "São Tomé and Príncipe": 'Sao Tome and Principe',
+    'Sao Tome & Principe': 'Sao Tome and Principe',
     "The Bahamas": "Bahamas",
-    "Cabo Verde": "Cape Verde"
+    'Trinidad & Tobago':  'Trinidad and Tobago',
+    "US Virgin Islands": "United States",
+    
 }
 
 nametocountry_mapping = {
@@ -66,10 +82,15 @@ nametocountry_mapping = {
     "Guam": "Guam",
     "Aruba": "Aruba",
     "Curacao": "Curacao",
+    "Bonaire": "Bonaire"
 }
 
 nametoname_mapping = {
     "Dependencias Federales": "Distrito Federal",
+}
+
+continent_mapping = {
+    "Australia": "Oceania",
 }
 
 df = normalize_countrynames(
@@ -78,9 +99,16 @@ df = normalize_countrynames(
 df = normalize_countrynames(
     df, "NAME", "COUNTRY", nametocountry_mapping)
 
+df = normalize_countrynames(
+    df, "NAME", "NAME", nametoname_mapping )
+
+df = normalize_countrynames(
+    df, "CONTINENT", "CONTINENT", nametocountry_mapping)
+
 # ======================================================================================================================
 # Add General Country Coordinates
 # ======================================================================================================================
+country_coordinates = create_country_dict(df_2)
 df = add_coordinates_to_dataframe(df, country_coordinates)
 
 # ======================================================================================================================

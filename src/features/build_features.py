@@ -14,9 +14,10 @@ df.index.name = "Year"
 # --------------------------------------------------------------
 # Data Group Parameters
 # --------------------------------------------------------------
-level_one = "COUNTRY"
-level_two = 'NAME'
-level_three = df.index.year
+level_one = "CONTINENT"
+level_two = "COUNTRY"
+level_three = 'NAME'
+date_level = df.index.year
 agg_params = {'UniqueID': 'count', 'Location': 'nunique', 'Organization': 'nunique',
               'TotalVolunteers': 'sum', 'Totalltems_EventRecord': 'sum',
               'SUM_Soft_CigaretteButts': 'sum', 'SUM_Hard_Lighter': 'sum', 'SUM_Soft_Straw': 'sum',
@@ -33,7 +34,7 @@ agg_params = {'UniqueID': 'count', 'Location': 'nunique', 'Organization': 'nuniq
               'SUM_Soft_OtherPlastic': 'sum', 'SUM_Foam_OtherPlasticDebris': 'sum',
               'SUM_OtherPlasticDebris': 'sum', 'SUM_OtherHardPlastic': 'sum'
               }
-grp_df = df.groupby([level_one, level_two, level_three]).agg(agg_params)
+grp_df = df.groupby([level_one, level_two, level_three, date_level]).agg(agg_params)
 
 
 # --------------------------------------------------------------
