@@ -10,19 +10,44 @@ import dash_bootstrap_components as dbc
 from functions.data_managing import *
 
 
-pickle_loc_1 = "../../data/interim/01_data_processed.pkl"
-pickle_loc_2 = "../../data/interim/02_data_processed.pkl"
+pickle_loc = "../../data/interim/01_data_processed.pkl"
 
-df_1 = pd.read_pickle(pickle_loc_1)
-df_2 = pd.read_pickle(pickle_loc_2)
+df = pd.read_pickle(pickle_loc)
+
 token = "pk.eyJ1Ijoic2FudGlhZ29wZXJlZGEiLCJhIjoiY2xpbm1wZG9qMDAyZTNtbGJsZDJjYWN2NyJ9.i66XD8Qd9IF3tjhRAV5oNg"
+
+
+# --------------------------------------------------------------
+# Data Group Parameters
+# --------------------------------------------------------------
+level_one = "CONTINENT"
+level_two = "COUNTRY"
+level_three = 'NAME'
+date_level = df.index.year
+agg_params = {'UniqueID': 'count', 'Location': 'nunique', 'Organization': 'nunique',
+              'TotalVolunteers': 'sum', 'Totalltems_EventRecord': 'sum',
+              'SUM_Soft_CigaretteButts': 'sum', 'SUM_Hard_Lighter': 'sum', 'SUM_Soft_Straw': 'sum',
+              'SUM_Hard_PlasticBeverageBottle': 'sum', 'SUM_Hard_OtherPlasticBottle': 'sum',
+              'SUM_HardOrSoft_PlasticBottleCap': 'sum', 'SUM_PlasticOrFoamPlatesBowlsCup': 'sum',
+              'SUM_PlasticOrFoamFoodContainer': 'sum', 'SUM_HardSoftLollipopStick_EarBu': 'sum',
+              'SUM_Soft_Bag': 'sum', 'SUM_Hard_BucketOrCrate': 'sum',
+              'SUM_Soft_WrapperOrLabel': 'sum', 'SUM_HardSoft_PersonalCareProduc': 'sum',
+              'SUM_Soft_StringRingRibbon': 'sum', 'PCT_PlasticAndFoam': 'sum',
+              'Soft_Sheets2': 'sum', 'PCT_Glass_Rubber_Lumber_Metal': 'sum',
+              'SUM_FishingLineLureRope': 'sum', 'Fishing_Net': 'sum',
+              'Fishing_BuoysAndFloats': 'sum', 'FishingGlowSticks2': 'sum',
+              'FishingOtherPlasticDebris2': 'sum', 'FishingGlowSticks2': 'sum',
+              'SUM_Soft_OtherPlastic': 'sum', 'SUM_Foam_OtherPlasticDebris': 'sum',
+              'SUM_OtherPlasticDebris': 'sum', 'SUM_OtherHardPlastic': 'sum'
+              }
+grp_df = df.groupby([level_one, level_two, level_three, date_level]).agg(agg_params)
 
 
 # --------------------------------------------------------------
 # Mapbox
 # --------------------------------------------------------------
 fig_1 = px.scatter_mapbox(
-    df_1,
+    df,
     lat='Latitude1',
     lon='Longitude1',
     hover_name="Location",
@@ -45,18 +70,20 @@ fig_1.update_layout(
     showlegend=False
 )
 fig_1.show()
+
 # --------------------------------------------------------------
 # Pie Charts
 # --------------------------------------------------------------
 
-level_one_slice = "United States"
+level_one_slice = slice(None)
 level_two_slice = slice(None)
+level_three_slice = slice(None)
 year_slice = slice(None)
 
-sliced_df = slice_multi_index_dataframe(df_2, level_one_slice,
-                                        level_two_slice, year_slice)
+sliced_df = slice_multi_index_dataframe(grp_df, level_one_slice,
+                            level_two_slice, level_three_slice, year_slice)
 
-sliced_df.index.get_level_values(1).unique()
+sliced_df.index.get_level_values(0).unique()
 
 bar_chart_cols = ['SUM_Soft_CigaretteButts', 'SUM_Hard_Lighter',
                   'SUM_Soft_Straw', 'SUM_Hard_PlasticBeverageBottle',
@@ -72,34 +99,80 @@ bar_chart_cols = ['SUM_Soft_CigaretteButts', 'SUM_Hard_Lighter',
                   'SUM_OtherPlasticDebris', 'SUM_OtherHardPlastic']
 
 filtered_df = yearly_filtered_data(sliced_df, bar_chart_cols, True)
+
 # --------------------------------------------------------------
 # Adjust plot settings
 # --------------------------------------------------------------
 
 yearly_filtered_data(sliced_df, ['Organization','TotalVolunteers','UniqueID'], False)
+
 # --------------------------------------------------------------
 # Compare medium vs. heavy sets
 # --------------------------------------------------------------
-level_one_slice = "Philippines"
-level_two_slice = "Cavite"
+level_one_slice = 'North America'
+level_two_slice = slice(None)
+level_three_slice= slice(None)
 year_slice = slice(None)
-threshold_check = True
 
-filtered_location = location_filter(df_1, level_one_slice, level_two_slice, True)
+filtered_location = location_filter(df, level_one_slice, level_two_slice, level_three_slice)
+
 
 fig = px.pie(filtered_location, values='SUM', names=filtered_location.index)
+
+fig.update_traces(textposition='inside',insidetextorientation='radial')
 
 fig.update_layout(
                 paper_bgcolor="rgba(0,0,0,0)",
                 font=dict(color='white'),   # Set the text color to white
-                showlegend=False,
+                showlegend=True,
+                uniformtext_minsize=10, 
+                uniformtext_mode='hide',
                 legend=dict(
                     orientation='h',  # Set the legend orientation to horizontal (top)
                     yanchor='bottom',
                     y=-5,  # Adjust the position of the legend
                     xanchor='left',
-                    x=0.1
-                    ),  
+                    x=0.1,
+                    font=dict(size=12)
+                    ),
+                    margin=dict(
+                        l=0,
+                        r=0,
+                        b=0,
+                        t=50,
+                        pad=0
+                    )
                 )
 
-fig
+fig.show()
+
+dff = df.copy()
+dff['SUM'] = df[bar_chart_cols].sum(axis=1)
+
+fig = px.sunburst(dff,  path=['CONTINENT','COUNTRY','NAME'], values='SUM')
+fig.update_layout(
+                paper_bgcolor="rgba(0,0,0,0)",
+                font=dict(color='white'),   # Set the text color to white
+                showlegend=True,
+                uniformtext_minsize=10, 
+                uniformtext_mode='hide',
+                legend=dict(
+                    orientation='h',  # Set the legend orientation to horizontal (top)
+                    yanchor='bottom',
+                    y=-5,  # Adjust the position of the legend
+                    xanchor='left',
+                    x=0.1,
+                    font=dict(size=12)
+                    ),
+                    margin=dict(
+                        l=0,
+                        r=0,
+                        b=0,
+                        t=50,
+                        pad=0
+                    )
+                )
+fig.show()
+
+
+df.info()

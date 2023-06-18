@@ -5,14 +5,14 @@ import pandas as pd
 # --------------------------------------------------------------
 
 
-def slice_multi_index_dataframe(df: pd.DataFrame, level_one_slice=slice(None), level_two_slice=slice(None), level_three_slice=slice(None)) -> pd.DataFrame:
+def slice_multi_index_dataframe(df: pd.DataFrame, level_one_slice, level_two_slice, level_three_slice, year_slice) -> pd.DataFrame:
     """
     Slices a DataFrame with a multi-level index based on the provided level slices.
     Parameters:
         df (pd.DataFrame): The input DataFrame with a multi-level index.
-        level_one_slice (slice): Slice for the first level of the multi-level index. Default is slice(None).
-        level_two_slice (slice): Slice for the second level of the multi-level index. Default is slice(None).
-        level_three_slice (slice): Slice for the third level of the multi-level index. Default is slice(None).
+        level_one_slice (slice): Slice for the first level of the multi-level index.
+        level_two_slice (slice): Slice for the second level of the multi-level index.
+        level_three_slice (slice): Slice for the third level of the multi-level index.
     Returns:
         pd.DataFrame: The sliced DataFrame based on the provided level slices.
     """
@@ -21,7 +21,7 @@ def slice_multi_index_dataframe(df: pd.DataFrame, level_one_slice=slice(None), l
 
     # Use .loc accessor and pd.IndexSlice to slice the DataFrame
     sliced_df = df.loc[idx[level_one_slice,
-                           level_two_slice, level_three_slice], :]
+                           level_two_slice, level_three_slice,year_slice], :]
 
     return sliced_df
 

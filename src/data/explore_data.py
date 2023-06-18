@@ -103,7 +103,7 @@ df = normalize_countrynames(
     df, "NAME", "NAME", nametoname_mapping )
 
 df = normalize_countrynames(
-    df, "CONTINENT", "CONTINENT", nametocountry_mapping)
+    df, "CONTINENT", "CONTINENT", continent_mapping)
 
 # ======================================================================================================================
 # Add General Country Coordinates

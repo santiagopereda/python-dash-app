@@ -40,19 +40,19 @@ grp_df = df.groupby([level_one, level_two, level_three, date_level]).agg(agg_par
 # --------------------------------------------------------------
 # Data Slice Parameters
 # --------------------------------------------------------------
-level_one_slice = slice(None)
+level_one_slice = "South America"
 level_two_slice = slice(None)
 level_three_slice = slice(None)
-
+year_slice = slice(None)
 sliced_df = slice_multi_index_dataframe(grp_df, level_one_slice,
-                            level_two_slice, level_three_slice)
+                            level_two_slice, level_three_slice,year_slice)
 
 
 
 
 sliced_df.sort_values(by=('TotalVolunteers'), ascending=False).head(10)
 
-sorted(df[df["COUNTRY"]=="United States"]["NAME"].unique())
+
 # --------------------------------------------------------------
 # Export Data
 # --------------------------------------------------------------
