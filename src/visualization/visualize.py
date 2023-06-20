@@ -16,7 +16,6 @@ df_2_loc = '../../data/raw/countries of the world.csv'
 df_2 = pd.read_csv(df_2_loc)
 df_2.columns
 df_2.Country.unique()
-token = "pk.eyJ1Ijoic2FudGlhZ29wZXJlZGEiLCJhIjoiY2xpbm1wZG9qMDAyZTNtbGJsZDJjYWN2NyJ9.i66XD8Qd9IF3tjhRAV5oNg"
 
 df_2.describe()
 
@@ -66,8 +65,7 @@ fig_1 = px.scatter_mapbox(
 )
 
 fig_1.update_layout(
-    mapbox_style="mapbox://styles/santiagopereda/clinlvecs002d01p73lb45noj",
-    mapbox_accesstoken=token,
+    mapbox_style="carto-positron",
     uirevision="Don't change",
     paper_bgcolor="#242424",
     autosize=True,
