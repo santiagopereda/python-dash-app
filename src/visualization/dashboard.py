@@ -340,7 +340,7 @@ def update_graph(year_slice, continent_dropdown_value, country_dropdown_value, s
     total_organizations = format(sunburst_data['Organization'].nunique(), ',')
     
     if item_dropdown_value is None:
-        item_dropdown_value = 'Pieces Collected'
+        item_dropdown_value = 'Total Pieces Collected'
         total_items_colected = format(
             sum(sunburst_data[item_dropdown_value]), ',')
         highlighted_locations = sunburst_data.sort_values(
