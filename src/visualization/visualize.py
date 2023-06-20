@@ -4,9 +4,6 @@
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-import dash
-from dash import Dash, dcc, html, Input, Output
-import dash_bootstrap_components as dbc
 from functions.data_managing import *
 
 
@@ -14,9 +11,17 @@ pickle_loc = "../../data/interim/01_data_processed.pkl"
 
 df = pd.read_pickle(pickle_loc)
 
+
+df_2_loc = '../../data/raw/countries of the world.csv'
+df_2 = pd.read_csv(df_2_loc)
+df_2.columns
+df_2.Country.unique()
 token = "pk.eyJ1Ijoic2FudGlhZ29wZXJlZGEiLCJhIjoiY2xpbm1wZG9qMDAyZTNtbGJsZDJjYWN2NyJ9.i66XD8Qd9IF3tjhRAV5oNg"
 
+df_2.describe()
 
+df_3_location = '../../data/raw/country_coordinates.csv'
+df_3 = pd.read_csv(df_3_location)
 # --------------------------------------------------------------
 # Data Group Parameters
 # --------------------------------------------------------------
@@ -109,7 +114,7 @@ yearly_filtered_data(sliced_df, ['Organization','TotalVolunteers','UniqueID'], F
 # --------------------------------------------------------------
 # Compare medium vs. heavy sets
 # --------------------------------------------------------------
-level_one_slice = 'North America'
+level_one_slice = slice(None)
 level_two_slice = slice(None)
 level_three_slice= slice(None)
 year_slice = slice(None)
@@ -147,10 +152,13 @@ fig.update_layout(
 fig.show()
 
 dff = df.copy()
-dff['SUM'] = df[bar_chart_cols].sum(axis=1)
+dff['Total Pieces Collected'] = df[bar_chart_cols].sum(axis=1)
 
-fig = px.sunburst(dff,  path=['CONTINENT','COUNTRY','NAME'], values='SUM')
-fig.update_layout(
+fig_2 = px.sunburst(dff,  path=['Cotinent','Country','State'], values='Total Pieces Collected')
+
+fig_2.update_traces(insidetextorientation='radial')
+
+fig_2.update_layout(
                 paper_bgcolor="rgba(0,0,0,0)",
                 font=dict(color='white'),   # Set the text color to white
                 showlegend=True,

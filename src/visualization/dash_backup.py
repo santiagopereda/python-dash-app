@@ -26,107 +26,90 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 # App layout
 # ======================================================================================================================
 app.layout = dbc.Container([
-    dbc.Row([
-        html.Div([
+    html.Div(children=[
+        dbc.Row([
             html.H5("Global Earth Challenge Report",
                     style={'text-left': 'center', 'color': 'white'})
-        ])
-    ]),
-    dbc.Row([
-        dbc.Col([
-            html.Div(id='output_container', children=[]),
-            html.Br(),
-            html.Div([
-            ]),
-            html.Div([
-                dbc.Button("Select Country", id="open-offcanvas", n_clicks=0),
-                dbc.Offcanvas(
-                    id="offcanvas",
-                    title="Select Countries & Regions",
-                    is_open=False,
-                    children=[
-                        dbc.Container([
-                            html.Link(
-                                rel='stylesheet',
-                                href='/assets/styles.css'
-                            ),
-                            html.H5("Country",
-                                    style={'text-left': 'center', 'color': 'white'}),
-                            dcc.Dropdown(
-                                options=[{'label': option, 'value': option}
-                                         for option in df_2.index.get_level_values(0).unique()],
-                                id="country-dropdown",
-                                placeholder="Select a Country",
-                                maxHeight=200,
-                                style={"background-color": 'transparent',
-                                       'fontSize': '16px'},
-                            ),
-                            html.Div(
-                                id='output_container_1',
-                                children=[],
-                                style={'display': 'none'},
-                            ),
-                            dcc.Dropdown(
-                                id="subdivision-dropdown",
-                                placeholder="Select State",
-                                maxHeight=200
-                            ),
-                            html.Div(
-                                id='output_container_2',
-                                children=[],
-                                style={'display': 'none'},
-                            ),
-                            dcc.Graph(
-                                id='location_piechart', figure={}
-                            )
-                        ], className='my-dropdown'),
-                    ]
-                ),
-            ]),
         ]),
-        dbc.Col([
-            dcc.Graph(id='eac_map', figure={}),
-            html.Br(),
-            dcc.RangeSlider(
-                id='slct_year',
-                min=df.index.year.min(),
-                max=df.index.year.max(),
-                step=1,
-                value=[df.index.year.min(), (df.index.year.max())],
-                marks=None,
-                # marks = {i: f'{i}' for i in range(df.index.year.min(), (df.index.year.max()+1))},
-                allowCross=False,
-                tooltip={"placement": "bottom", "always_visible": True},
-            )
-        ]),
-        dbc.Col([
-
-        ])
     ]),
-    dbc.Row([
-        dbc.Col(
-            [
-                dcc.Graph(id='bar_table', figure={})
-            ]
-        ),
+    html.Div(children=[
+        dbc.Row([
+            dbc.Col([
+                html.Div([
+                    html.Link(
+                        rel='stylesheet',
+                        href='/assets/styles.css'
+                    ),
+                    html.H5("Country",
+                            style={'text-left': 'center', 'color': 'white'}),
+                    dcc.Dropdown(
+                        options=[{'label': option, 'value': option}
+                                 for option in df_2.index.get_level_values(0).unique()],
+                        id="country-dropdown",
+                        placeholder="Select a Country",
+                        maxHeight=200,
+                        style={"background-color": 'transparent',
+                               'fontSize': '16px'},
+                    ),
+                    html.Div(
+                        id='output_container_1',
+                        children=[],
+                        style={'display': 'none'},
+                    ),
+                    dcc.Dropdown(
+                        id="subdivision-dropdown",
+                        placeholder="Select State",
+                        maxHeight=200
+                    ),
+                    html.Div(
+                        id='output_container_2',
+                        children=[],
+                        style={'display': 'none'},
+                    ),
+                ], className='my-dropdown'),
+            ], md=2),
+            dbc.Col([
+                html.Div([
+                    dcc.Graph(id='eac_map', figure={}),
+                ]),
+                html.Br(),
+                html.Div([
+                    dcc.RangeSlider(
+                        id='slct_year',
+                        min=df.index.year.min(),
+                        max=df.index.year.max(),
+                        step=1,
+                        value=[df.index.year.min(), (df.index.year.max())],
+                        marks=None,
+                        allowCross=False,
+                        tooltip={"placement": "bottom",
+                                 "always_visible": True},
+                    )
+                ]),
+            ], md=6)
+        ]),
+    ]),
+    html.Div(children=[
+        dbc.Row([
+            dbc.Col([
+                html.Div([
+                    dcc.Graph(
+                        id='location_piechart',
+                    )
+                ])
+            ], md=3),
+            dbc.Col([
+                html.Div([
+                    dcc.Graph(id='bar_table', figure={}),
+                ]),
+            ], md=9)
+        ])
     ])
-
 ], fluid=True)
 
 # ======================================================================================================================
 # Connect the Plotly graphs with Dash Components
 # ======================================================================================================================
-
-
-@app.callback(
-    Output("offcanvas", "is_open"),
-    Input("open-offcanvas", "n_clicks"),
-    [State("offcanvas", "is_open")],
-)
-def toggle_offcanvas(n1, is_open):
-    if n1:
-        return not is_open
-    return is_open
 
 
 @app.callback(
@@ -230,7 +213,7 @@ def update_graph(option_slctd, country_dropdown_value, subdivision_dropdown_valu
         level_three_slice = filled_list
 
     sliced_df = slice_multi_index_dataframe(dff, level_one_slice,
-                                            level_two_slice, level_three_slice)
+                                            level_two_slice, level_three_slice, level_three_slice)
 
     bar_chart_cols = ['SUM_Soft_CigaretteButts', 'SUM_Hard_Lighter',
                       'SUM_Soft_Straw', 'SUM_Hard_PlasticBeverageBottle',
