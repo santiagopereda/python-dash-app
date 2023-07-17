@@ -75,7 +75,7 @@ app.layout = dbc.Container([
                                 placeholder="Select Item",
                                 maxHeight=200,
                                 style={"background-color": 'transparent',
-                                       'fontSize': '16px', "margin-top": "5px"},
+                                       'fontSize': '16px', "margin-top": "5px", "margin-bottom": "5px"},
                             ),
                         ])
                     ),
@@ -92,7 +92,7 @@ app.layout = dbc.Container([
                                 placeholder="Select a Continent",
                                 maxHeight=200,
                                 style={"background-color": 'transparent',
-                                       'fontSize': '16px', "margin-top": "5px"},
+                                       'fontSize': '16px', "margin-top": "5px", "margin-bottom": "5px"},
                             ),
                         ])
 
@@ -270,32 +270,35 @@ def update_graph(year_slice, continent_dropdown_value, country_dropdown_value, s
         subdivision_style = {'display': 'none'}
         filtered_data = dff.loc[str(start_year):str(end_year)]
         country_center = dict(lat=20, lon=15)
+        participant_location = "Worldwide"
 
     elif continent_dropdown_value is not None and (country_dropdown_value is None or len(country_dropdown_value) < 1):
         country_options = [{'label': country, 'value': country}
                            for country in country_list]
         country_style = {"background-color": 'transparent',
-                         'fontSize': '16px', "margin-top": "5px"}
+                         'fontSize': '16px', "margin-top": "5px", "margin-bottom": "5px"}
         subdivision_options = []
         subdivision_style = {'display': 'none'}
         filtered_data = filtered_data.loc[(
             filtered_data["Continent"] == continent_dropdown_value)]
         country_center = dict(lat=20, lon=15)
+        participant_location = continent_dropdown_value
 
     elif continent_dropdown_value is not None and country_dropdown_value is not None and (subdivision_dropdown_value is None or len(subdivision_dropdown_value) < 1):
         country_options = [{'label': country, 'value': country}
                            for country in country_list]
         country_style = {"background-color": 'transparent',
-                         'fontSize': '16px', "margin-top": "5px"}
+                         'fontSize': '16px', "margin-top": "5px", "margin-bottom": "5px"}
         subdivision_options = [{'label': subdivision, 'value': subdivision}
                                for subdivision in subdivisions_list]
         subdivision_style = {"background-color": 'transparent',
-                             'fontSize': '16px', "margin-top": "5px"}
+                             'fontSize': '16px', "margin-top": "5px", "margin-bottom": "5px"}
         filtered_data = filtered_data.loc[(
             filtered_data["Continent"] == continent_dropdown_value) &
             (filtered_data["Country"] == country_dropdown_value)]
         country_center = dict(lat=(filtered_data['Country_Latitude'].unique()[
                               0]), lon=(filtered_data['Country_Longitude'].unique()[0]))
+        participant_location = country_dropdown_value
 
     elif continent_dropdown_value is None and (country_dropdown_value is not None or subdivision_dropdown_value is not None):
         country_dropdown_value = None
@@ -306,21 +309,23 @@ def update_graph(year_slice, continent_dropdown_value, country_dropdown_value, s
         subdivision_style = {'display': 'none'}
         filtered_data = dff.loc[str(start_year):str(end_year)]
         country_center = dict(lat=20, lon=15)
+        participant_location = continent_dropdown_value
 
     else:
         country_options = [{'label': country, 'value': country}
                            for country in country_list]
         country_style = {"background-color": 'transparent',
-                         'fontSize': '16px', "margin-top": "5px"}
+                         'fontSize': '16px', "margin-top": "5px", "margin-bottom": "5px"}
         subdivision_options = [{'label': subdivision, 'value': subdivision}
                                for subdivision in subdivisions_list]
         subdivision_style = {"background-color": 'transparent',
-                             'fontSize': '16px', "margin-top": "5px"}
+                             'fontSize': '16px', "margin-top": "5px", "margin-bottom": "5px"}
         filtered_data = filtered_data.loc[(
             filtered_data["Continent"] == continent_dropdown_value) & (filtered_data["Country"] == country_dropdown_value) &
             (filtered_data["State"] == subdivision_dropdown_value)]
         country_center = dict(lat=(filtered_data['Country_Latitude'].unique()[
                               0]), lon=(filtered_data['Country_Longitude'].unique()[0]))
+        participant_location = subdivision_dropdown_value
 
     sunburst_data = filtered_data.copy()
     sunburst_data['Total Pieces Collected'] = filtered_data[bar_chart_cols].sum(
@@ -338,7 +343,7 @@ def update_graph(year_slice, continent_dropdown_value, country_dropdown_value, s
 
     total_participants = format(sum(sunburst_data['Volunteers']), ',')
     total_organizations = format(sunburst_data['Organization'].nunique(), ',')
-    
+
     if item_dropdown_value is None:
         item_dropdown_value = 'Total Pieces Collected'
         total_items_colected = format(
@@ -359,7 +364,7 @@ def update_graph(year_slice, continent_dropdown_value, country_dropdown_value, s
     if country_dropdown_value is not None and country_dropdown_value in df_3['Country'].astype(str).values:
         df_3['Area (sq. mi.)'] = pd.to_numeric(
             df_3['Area (sq. mi.)'], errors='coerce')
-        print(df_3['Country'].dtype)
+
         country_area = df_3.loc[df_3['Country'] == str(
             country_dropdown_value), 'Area (sq. mi.)'].values[0]
 
@@ -398,8 +403,7 @@ def update_graph(year_slice, continent_dropdown_value, country_dropdown_value, s
         color_discrete_map={True: highlight_color, False: non_highlight_color},
         zoom=country_zoom,  # Set the initial zoom level
         center=country_center,  # Set the initial center location
-        width=700,
-        height=550,
+
         opacity=0.85,
     )
     fig.update_layout(
@@ -453,7 +457,7 @@ def update_graph(year_slice, continent_dropdown_value, country_dropdown_value, s
 # Function Return
 # ======================================================================================================================
 
-    return fig,  fig_2, container_1, container_2, country_options, country_style, country_dropdown_value, subdivision_options, subdivision_style, subdivision_dropdown_value, html.P(f'{total_organizations}'), html.P(f'{format(total_participants)}'), html.P([f'{total_items_colected}', html.Br(), f'{item_dropdown_value}'])
+    return fig,  fig_2, container_1, container_2, country_options, country_style, country_dropdown_value, subdivision_options, subdivision_style, subdivision_dropdown_value, html.P(f'{total_organizations}'), html.P([f'{format(total_participants)}', html.Br(), f'{participant_location}']), html.P([f'{total_items_colected}', html.Br(), f'{item_dropdown_value}'])
 
 
 # ======================================================================================================================
